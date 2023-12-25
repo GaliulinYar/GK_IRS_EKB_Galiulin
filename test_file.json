@@ -1,0 +1,27 @@
+[
+    {
+        "some_field_1": "Value1",
+        "some_field_2": 10,
+        "some_field_3": 3.14
+    },
+    {
+        "some_field_1": "Value2",
+        "some_field_2": 20,
+        "some_field_3": 6.28
+    },
+    {
+        "some_field_1": "Value3",
+        "some_field_2": 30,
+        "some_field_3": 9.42
+    },
+    {
+        "some_field_1": "Value4",
+        "some_field_2": 40,
+        "some_field_3": 12.56
+    },
+    {
+        "some_field_1": "Value5",
+        "some_field_2": 50,
+        "some_field_3": 15.7
+    }
+]
