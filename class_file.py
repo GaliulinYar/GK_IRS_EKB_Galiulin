@@ -1,5 +1,4 @@
-from main import create_request, insert_data
-from work_db import check_db
+from work_db import create_request, insert_data, check_db
 
 
 class OrmModel:
@@ -7,112 +6,91 @@ class OrmModel:
     def __init__(self, **kwargs):
         self.fields = kwargs
         self.name_table = str(self.__class__.__name__)
-        self.check_key = False  # Проверка на то что primary_key нигде не указан
+        self.data_base_name = 'Test_DB'
 
-        for key, value in self.fields.items():  # перебираем ключи и значения
+        self.key_list = []
+        self.value_list = []
 
-            if key and value.primary_key:  # проверяем pk на значение primary key true
-                self.check_key = True
-                if key == 'pk':
-                    # Вызываем функцию для создания запроса
-                    query = create_request(self)
-                    print(query)
-                    # Создаем БД и отправляем запрос на создание таблицы
-                    check_db('SomeDB', query)
-                    # создаем запрос на добавление данных таблицы
-                    query_list = insert_data(self)
-                    print(query_list)
-        """почему выводится 5 раз"""
-        if self.check_key is False:
-            print('check_key None')
+    def create_query(self):
+        """класс метод для составления запроса к БД"""
+
+        for key, value in self.fields.items():
+            self.key_list.append(key)
+            self.value_list.append(value)
+        # Вызываем функцию для составления запроса
+        request_for_db = insert_data(self.key_list, self.value_list, self.name_table)
+        # Вызываем функцию для отправки запроса в БД
+        check_db(self.data_base_name, request_for_db)
 
     def __str__(self):
         return ', '.join(f'{key}={value}' for key, value in self.fields.items())
 
 
 class SomeTable(OrmModel):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
-        # Итерируемся по переданным аргументам и создаем атрибуты для просмотрав строке
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.fields = kwargs
+        self.primary_key_id = 0
+        self.name_table = 'OrmModel'
+
         for key, value in kwargs.items():
-            setattr(self, key, value)
+
+            if isinstance(value, OrmInteger):
+
+                if value.primary_key:
+                    self.name_table = 'OrmInteger'
+                    self.key_list.append(f'{key} INTEGER PRIMARY KEY')
+                else:
+                    self.primary_key_id += 1
+                    self.key_list.append(f'{key} INTEGER')
+
+            elif isinstance(value, OrmText):
+                if value.primary_key:
+                    self.name_table = 'OrmText'
+                    self.key_list.append(f'{key} TEXT PRIMARY KEY')
+                else:
+                    self.primary_key_id += 1
+                    self.key_list.append(f'{key} TEXT')
+
+            elif isinstance(value, OrmFloat):
+                if value.primary_key:
+                    self.name_table = 'OrmFloat'
+                    self.key_list.append(f'{key} REAL PRIMARY KEY')
+                else:
+                    self.primary_key_id += 1
+                    self.key_list.append(f'{key} REAL')
+
+        if self.primary_key_id == len(self.key_list):
+            self.key_list.insert(0, f'id INTEGER PRIMARY KEY AUTOINCREMENT')
+        # Вызываем функцию для составления запроса
+        request_for_db = create_request(self.key_list, self.name_table)
+        # Вызываем функцию для отправки запроса в БД
+        check_db(self.data_base_name, request_for_db)
 
 
 class OrmText(OrmModel):
-    def __init__(self, value=None, primary_key=False, **kwargs):
+    def __init__(self, primary_key=False, **kwargs):
         super().__init__(**kwargs)
-        self.value = value
         self.primary_key = primary_key
 
-        if self.primary_key:
-            print('primary_key true')
-
-    def __str__(self):
-        return f'{self.value}, primary_key={self.primary_key}'
+    # def __str__(self):
+    #     return f'{self.value}, primary_key={self.primary_key}'
 
 
-class OrmInteger(SomeTable):
-    def __init__(self, value=None, primary_key=False, **kwargs):
+class OrmInteger(OrmModel):
+    def __init__(self, primary_key=False, **kwargs):
         super().__init__(**kwargs)
-        self.value = value
         self.primary_key = primary_key
 
-        if self.primary_key:
-            print(self.primary_key, self.value)
-
-            for key, value in self.__dict__.items():  # перебираем ключи и значения
-                # print(key, value)
-
-                """код ниже из класса OrmModel не работает, если переношу сюда"""
-
-                # if key and value.primary_key:  # проверяем pk на значение primary key true
-                #
-                #     if key == 'pk':
-                #         # Вызываем функцию для создания запроса
-                #         query = create_request(self)
-                #         print(query)
-                #         # Создаем БД и отправляем запрос на создание таблицы
-                #         check_db('SomeDB', query)
-                #         # создаем запрос на добавление данных таблицы
-                #         query_list = insert_data(self)
-                #         print(query_list)
-
-    def __str__(self):
-        return f'{self.value}, primary_key={self.primary_key}'
+    # def __str__(self):
+    #     return f'{self.value}, primary_key={self.primary_key}'
 
 
 class OrmFloat(OrmModel):
-    def __init__(self, value=None, primary_key=False, **kwargs):
+    def __init__(self, primary_key=False, **kwargs):
         super().__init__(**kwargs)
-        self.value = value
         self.primary_key = primary_key
 
-    def __str__(self):
-        return f'{self.value}, primary_key={self.primary_key}'
-
-
-table_instance = SomeTable(
-    pk=OrmInteger(),
-    some_field_1=OrmText(value='some text'),
-    some_field_2=OrmInteger(value=4),
-    some_field_3=OrmFloat(value=3.44))
-
-
-# table_instance2 = SomeTable(
-#     pk=OrmInteger(primary_key=True),
-#     some_field_1=OrmText(value='some text'),
-#     some_field_2=OrmInteger(value=4),
-#     some_field_3=OrmFloat(value=3.44),
-#     some_field_4=OrmFloat(value=54.44, primary_key=True)
-# )
-
-# print(table_instance)
-# print(table_instance2)
-# print(table_instance)
-# CREATE TABLE YourTableName (
-#     id INTEGER PRIMARY KEY,
-#     column1 TEXT,
-#     column2 INTEGER,
-#     column3 REAL
-# );
+    # def __str__(self):
+    #     return f'{self.value}, primary_key={self.primary_key}'

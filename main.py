@@ -1,40 +1,30 @@
-def create_request(self):
-    """Функция для создания запроса в БД для создания таблицы где pk primary key"""
-    create_list_db = []
-    for name, value_field in zip(self.fields.keys(), self.fields.values()):
-        if isinstance(value_field.value, str):
-            create_list_db.append(f'{name} TEXT')
-        elif isinstance(value_field.value, int):
-            create_list_db.append(f'{name} INTEGER')
-        elif isinstance(value_field.value, float):
-            create_list_db.append(f'{name} REAL')
+from class_file import SomeTable, OrmInteger, OrmText, OrmFloat, OrmModel
 
-    field_definitions = ', '.join(create_list_db)
-    query = f'CREATE TABLE {self.name_table} (pk INTEGER PRIMARY KEY AUTOINCREMENT, {field_definitions})'
-    return query
+# Экземплаяр для создания таблицы с нужными столбиками
+# table_instance = SomeTable(
+#     some_field_1=OrmText(primary_key=True),
+#     some_field_2=OrmInteger(),
+#     some_field_3=OrmFloat(),
+#     some_field_4=OrmText())
 
-
-def insert_data(self):
-    """Для создания запроса заполнения\дописывание БД"""
-    for name, value_field in zip(self.fields.keys(), self.fields.values()):
-        print(name)
-        print(value_field.value)
-    query_insert = f'INSERT INTO {self.name_table} (значение) VALUES (Значение)'
-    return query_insert
+# Экземпляр класс где id primary_key - True
+# model1 = OrmModel(
+#     some_field_1='значение_поля_1',
+#     some_field_2=42,
+#     some_field_3=3.14,
+#     some_field_4='значение_поля_4')
+# #
+# #  # Вызов метода класса для загрузки данных
+# model1.create_query()
 
 
-# def create_request_pk(name_table, **kwargs):
-#     """Функция для создания запроса в БД для создания таблицы, где
-#     primary key какое-то другое поле"""
-#     create_list_db = []
-#     for name, value_field in kwargs.items():
-#         if isinstance(value_field.value, str):
-#             create_list_db.append(f'{name} TEXT')
-#         elif isinstance(value_field.value, int):
-#             create_list_db.append(f'{name} INTEGER')
-#         elif isinstance(value_field.value, float):
-#             create_list_db.append(f'{name} REAL')
-#
-#     field_definitions = ', '.join(create_list_db)
-#     query = f'CREATE TABLE {name_table} (pk INTEGER PRIMARY KEY AUTOINCREMENT, {field_definitions})'
-#     return query
+model2 = OrmText(
+    some_field_1='значение_поля_11',
+    some_field_2=424,
+    some_field_3=3.1444,
+    some_field_4='значение_поля_44')
+
+model2.create_query()
+
+
+
